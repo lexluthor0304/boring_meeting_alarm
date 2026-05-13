@@ -106,6 +106,74 @@ body {
   color: var(--text-muted);
 }
 
+.intro {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.faq {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: var(--shadow);
+}
+
+.faq h2 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+}
+
+.faq-item {
+  padding: 0.875rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.faq-item:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.faq-item:last-of-type {
+  padding-bottom: 0;
+}
+
+.faq-item h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.faq-item p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.footer-meta {
+  margin: 0.5rem 0 0;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.footer-meta a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 2px;
+}
+
+.footer-meta a:hover {
+  text-decoration-color: var(--text-muted);
+}
+
 .status-card,
 .settings-card,
 .instructions {

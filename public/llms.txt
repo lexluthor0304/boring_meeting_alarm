@@ -1,0 +1,48 @@
+# Boring Meeting Alarm
+
+> A free browser tool that listens to the audio of a meeting tab you share via screen sharing, and alerts you with a modal, system notification, alarm sound, and tab title flash when the audio stays silent longer than a duration you configure. Designed for remote video calls where the host wraps up while you have stepped away.
+
+Everything runs locally in the browser. No backend, no recording, no upload — audio is analyzed entirely in-page via the Web Audio API.
+
+## How it works
+
+The page captures the audio stream of a user-selected tab via `navigator.mediaDevices.getDisplayMedia({ audio: true })`. The stream is routed through an `AnalyserNode` (`fftSize=2048`) and polled every 200ms to compute the RMS level in dB. When the level stays below a user-configurable threshold (-80 to -20 dB, default -50) for a user-configurable duration (5 to 3600 seconds, default 30), the page fires:
+
+- An in-page modal alert
+- A synthesized alarm tone (OscillatorNode + GainNode, opt-in)
+- A `Notification` system notification (opt-in, requires permission)
+- A flashing tab title
+
+A volume bar with live dB readout helps users pick a threshold while talking.
+
+## Browser support
+
+- **Chrome / Edge / Brave / Arc / other Chromium-based browsers**: fully supported
+- **Firefox**: not supported — Firefox does not provide a "Share tab audio" option in its `getDisplayMedia` dialog
+- **Safari**: limited and not officially tested
+- HTTPS required (production is fine; `localhost` is a secure context for development)
+
+## Languages
+
+- English: https://alarm.tokugai.com/
+- 简体中文: https://alarm.tokugai.com/zh/
+- 日本語: https://alarm.tokugai.com/ja/
+
+## Pricing
+
+Free. No accounts. No tracking beyond opt-in Google Analytics. Hosted on Cloudflare Workers Static Assets.
+
+## Privacy
+
+- All audio analysis happens locally in the browser via Web Audio API
+- No audio stream is uploaded, recorded, or transmitted
+- Google Analytics 4 (cookieless by default via Consent Mode v2; full tracking only after explicit user consent)
+- Google AdSense (non-personalized by default; personalized only after explicit consent)
+
+## Source code
+
+https://github.com/lexluthor0304/boring_meeting_alarm — MIT licensed.
+
+## Author
+
+Built by tokugai. Last updated 2026-05-13.
