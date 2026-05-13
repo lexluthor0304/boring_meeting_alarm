@@ -34,15 +34,35 @@ const hreflangs: { hreflang: string; href: string }[] = [
       <link rel="alternate" hreflang={hreflang} href={href} />
     ))}
 
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ window.dataLayer.push(arguments); }
+      window.gtag = gtag;
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+        wait_for_update: 500,
+      });
+      try {
+        if (localStorage.getItem('bma:consent') === 'granted') {
+          gtag('consent', 'update', {
+            ad_storage: 'granted',
+            ad_user_data: 'granted',
+            ad_personalization: 'granted',
+            analytics_storage: 'granted',
+          });
+        }
+      } catch (_) {}
+    </script>
+
     {gaId && (
       <>
         <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
         <script is:inline define:vars={{ gaId }}>
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){ window.dataLayer.push(arguments); }
-          window.gtag = gtag;
           gtag('js', new Date());
-          gtag('config', gaId, { anonymize_ip: true });
+          gtag('config', gaId);
         </script>
       </>
     )}
@@ -139,6 +159,14 @@ const hreflangs: { hreflang: string; href: string }[] = [
       <p>{t.footerTip}</p>
     </footer>
 
+    <div class="consent-banner" data-consent-banner hidden role="region" aria-label="Cookie consent">
+      <p class="consent-message">{t.consentMessage}</p>
+      <div class="consent-actions">
+        <button type="button" class="secondary" data-consent-reject>{t.consentReject}</button>
+        <button type="button" class="primary" data-consent-accept>{t.consentAccept}</button>
+      </div>
+    </div>
+
     <div class="modal" data-modal hidden role="alertdialog" aria-modal="true" aria-labelledby="modal-title">
       <div class="modal-content">
         <h2 id="modal-title" data-modal-title></h2>
@@ -180,6 +208,37 @@ const hreflangs: { hreflang: string; href: string }[] = [
       const modalBody = $('[data-modal-body]');
       const modalDismiss = $<HTMLButtonElement>('[data-modal-dismiss]');
       modalDismiss.textContent = t.alertDismiss;
+      const consentBanner = $<HTMLDivElement>('[data-consent-banner]');
+      const consentAcceptBtn = $<HTMLButtonElement>('[data-consent-accept]');
+      const consentRejectBtn = $<HTMLButtonElement>('[data-consent-reject]');
+
+      const CONSENT_KEY = 'bma:consent';
+      const consentDecision = (() => {
+        try { return localStorage.getItem(CONSENT_KEY); } catch { return null; }
+      })();
+      if (!consentDecision) {
+        consentBanner.hidden = false;
+      }
+
+      function persistConsent(decision: 'granted' | 'denied'): void {
+        try { localStorage.setItem(CONSENT_KEY, decision); } catch {}
+      }
+
+      consentAcceptBtn.addEventListener('click', () => {
+        persistConsent('granted');
+        window.gtag?.('consent', 'update', {
+          ad_storage: 'granted',
+          ad_user_data: 'granted',
+          ad_personalization: 'granted',
+          analytics_storage: 'granted',
+        });
+        consentBanner.hidden = true;
+      });
+
+      consentRejectBtn.addEventListener('click', () => {
+        persistConsent('denied');
+        consentBanner.hidden = true;
+      });
 
       const settings = loadSettings();
       inputDuration.value = String(settings.silenceDurationSec);

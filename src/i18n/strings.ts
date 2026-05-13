@@ -33,6 +33,9 @@ type StringMap = {
   languageSwitcherLabel: string;
   footerTip: string;
   metaDescription: string;
+  consentMessage: string;
+  consentAccept: string;
+  consentReject: string;
 };
 
 export const strings: Record<Locale, StringMap> = {
@@ -68,6 +71,9 @@ export const strings: Record<Locale, StringMap> = {
     languageSwitcherLabel: 'Language',
     footerTip: 'Everything runs locally in your browser. No audio leaves your machine.',
     metaDescription: 'A simple browser tool that listens to your meeting tab and alerts you when the silence drags on.',
+    consentMessage: 'We use cookies for analytics and to show ads. Allow optional cookies?',
+    consentAccept: 'Allow',
+    consentReject: 'Reject',
   },
   zh: {
     htmlLang: 'zh-CN',
@@ -101,6 +107,9 @@ export const strings: Record<Locale, StringMap> = {
     languageSwitcherLabel: '语言',
     footerTip: '所有处理都在你本地浏览器完成，音频不会上传任何服务器。',
     metaDescription: '一个在浏览器里监听会议标签页音频的小工具，长时间静音时提醒你会议可能已结束。',
+    consentMessage: '本站使用 cookies 进行匿名访问分析与广告投放，是否允许？',
+    consentAccept: '允许',
+    consentReject: '拒绝',
   },
   ja: {
     htmlLang: 'ja',
@@ -134,5 +143,8 @@ export const strings: Record<Locale, StringMap> = {
     languageSwitcherLabel: '言語',
     footerTip: 'すべての処理はブラウザ内で完結し、音声がサーバーに送信されることはありません。',
     metaDescription: '会議タブの音声をブラウザだけで監視し、長い無音が続いたら通知してくれる小さなツール。',
+    consentMessage: 'アクセス解析と広告表示のために Cookie を利用します。許可しますか？',
+    consentAccept: '許可する',
+    consentReject: '拒否する',
   },
 };
