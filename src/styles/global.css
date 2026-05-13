@@ -356,6 +356,59 @@ button.secondary:hover {
   margin: 0;
 }
 
+.consent-banner {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 900;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+  padding: 0.875rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.consent-banner[hidden] {
+  display: none;
+}
+
+.consent-message {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  flex: 1 1 18rem;
+  line-height: 1.5;
+}
+
+.consent-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.consent-actions button {
+  flex: 0 0 auto;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 480px) {
+  .consent-banner {
+    padding: 0.75rem 1rem;
+  }
+  .consent-actions {
+    width: 100%;
+  }
+  .consent-actions button {
+    flex: 1;
+  }
+}
+
 .modal {
   position: fixed;
   inset: 0;
