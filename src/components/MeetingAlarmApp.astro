@@ -98,6 +98,8 @@ const howToJsonLd = {
     <script is:inline type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
     <script is:inline type="application/ld+json" set:html={JSON.stringify(howToJsonLd)} />
 
+    <script is:inline async defer src="https://buttons.github.io/buttons.js"></script>
+
     <script is:inline>
       window.dataLayer = window.dataLayer || [];
       function gtag(){ window.dataLayer.push(arguments); }
@@ -231,12 +233,30 @@ const howToJsonLd = {
 
     <footer class="footer">
       <p>{t.footerTip}</p>
+      <div class="github-buttons">
+        <a
+          class="github-button"
+          href={repoUrl}
+          data-color-scheme="no-preference: light; light: light; dark: dark;"
+          data-icon="octicon-star"
+          data-size="large"
+          data-show-count="true"
+          aria-label="Star lexluthor0304/boring_meeting_alarm on GitHub"
+        >Star</a>
+        <a
+          class="github-button"
+          href={`${repoUrl}/fork`}
+          data-color-scheme="no-preference: light; light: light; dark: dark;"
+          data-icon="octicon-repo-forked"
+          data-size="large"
+          data-show-count="true"
+          aria-label="Fork lexluthor0304/boring_meeting_alarm on GitHub"
+        >Fork</a>
+      </div>
       <p class="footer-meta">
         <span>{t.footerBuilder}</span>
         <span aria-hidden="true">·</span>
         <span>{t.footerUpdatedPrefix}<time datetime={lastUpdated}>{lastUpdated}</time></span>
-        <span aria-hidden="true">·</span>
-        <a href={repoUrl} rel="noopener" target="_blank">{t.footerSource}</a>
       </p>
     </footer>
 
