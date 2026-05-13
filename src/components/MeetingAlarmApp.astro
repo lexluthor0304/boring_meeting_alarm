@@ -1,0 +1,393 @@
+---
+import { strings, type Locale } from '../i18n/strings';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import '../styles/global.css';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = strings[locale];
+const gaId = import.meta.env.PUBLIC_GA_ID;
+const adsenseClient = import.meta.env.PUBLIC_ADSENSE_CLIENT_ID;
+
+const siteOrigin = 'https://alarm.tokugai.com';
+const hreflangs: { hreflang: string; href: string }[] = [
+  { hreflang: 'en', href: `${siteOrigin}/` },
+  { hreflang: 'zh', href: `${siteOrigin}/zh/` },
+  { hreflang: 'ja', href: `${siteOrigin}/ja/` },
+  { hreflang: 'x-default', href: `${siteOrigin}/` },
+];
+---
+<!doctype html>
+<html lang={t.htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>{t.title}</title>
+    <meta name="description" content={t.metaDescription} />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E%F0%9F%94%94%3C/text%3E%3C/svg%3E" />
+
+    {hreflangs.map(({ hreflang, href }) => (
+      <link rel="alternate" hreflang={hreflang} href={href} />
+    ))}
+
+    {gaId && (
+      <>
+        <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
+        <script is:inline define:vars={{ gaId }}>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){ window.dataLayer.push(arguments); }
+          window.gtag = gtag;
+          gtag('js', new Date());
+          gtag('config', gaId, { anonymize_ip: true });
+        </script>
+      </>
+    )}
+
+    {adsenseClient && (
+      <>
+        <meta name="google-adsense-account" content={adsenseClient} />
+        <script
+          is:inline
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
+          crossorigin="anonymous"
+        ></script>
+      </>
+    )}
+
+    <script is:inline define:vars={{ t, locale }}>
+      window.__BMA__ = { t, locale };
+    </script>
+  </head>
+  <body>
+    <header class="top-bar">
+      <h1 class="app-title">{t.title}</h1>
+      <LanguageSwitcher current={locale} />
+    </header>
+
+    <main class="app">
+      <p class="tagline">{t.tagline}</p>
+
+      <section class="status-card" aria-live="polite">
+        <div class="status-row">
+          <span class="status-dot" data-status-dot></span>
+          <span class="status-label" data-status-label>{t.statusIdle}</span>
+        </div>
+
+        <div class="volume-row">
+          <span class="volume-caption">{t.currentVolume}</span>
+          <div class="volume-bar" aria-hidden="true">
+            <div class="volume-bar-fill" data-volume-fill></div>
+            <div class="volume-bar-threshold" data-volume-threshold></div>
+          </div>
+          <span class="volume-readout" data-volume-readout>—</span>
+        </div>
+      </section>
+
+      <section class="settings-card">
+        <label class="field" for="bma-duration">
+          <span class="field-label">{t.silenceDurationLabel}</span>
+          <span class="field-control">
+            <input id="bma-duration" name="bma-duration" type="number" data-input-duration min="5" max="3600" step="1" />
+            <span class="field-unit">{t.seconds}</span>
+          </span>
+        </label>
+
+        <label class="field" for="bma-threshold">
+          <span class="field-label">
+            {t.thresholdLabel}
+            <span class="field-value" data-threshold-readout>—</span>
+          </span>
+          <input id="bma-threshold" name="bma-threshold" type="range" data-input-threshold min="-80" max="-20" step="1" class="range-input" />
+          <span class="field-hint">{t.thresholdHint}</span>
+        </label>
+
+        <label class="checkbox" for="bma-alarm-sound">
+          <input id="bma-alarm-sound" name="bma-alarm-sound" type="checkbox" data-input-alarm-sound />
+          <span>{t.playAlarmSound}</span>
+        </label>
+
+        <label class="checkbox" for="bma-notification">
+          <input id="bma-notification" name="bma-notification" type="checkbox" data-input-notification />
+          <span>{t.enableNotification}</span>
+        </label>
+      </section>
+
+      <section class="action-row">
+        <button type="button" class="primary" data-action-start>{t.startMonitoring}</button>
+        <button type="button" class="secondary" data-action-stop hidden>{t.stopMonitoring}</button>
+      </section>
+
+      <p class="error-message" data-error hidden></p>
+
+      <section class="instructions">
+        <h2>{t.instructionsTitle}</h2>
+        <ol>
+          <li>{t.instruction1}</li>
+          <li>{t.instruction2}</li>
+          <li>{t.instruction3}</li>
+        </ol>
+        <p class="browser-hint">{t.browserHint}</p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>{t.footerTip}</p>
+    </footer>
+
+    <div class="modal" data-modal hidden role="alertdialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-content">
+        <h2 id="modal-title" data-modal-title></h2>
+        <p data-modal-body></p>
+        <button type="button" class="primary" data-modal-dismiss></button>
+      </div>
+    </div>
+
+    <script>
+      import { loadSettings, saveSettings, SETTINGS_LIMITS } from '../lib/settings';
+      import { SilenceDetector } from '../lib/silence-detector';
+      import { AlertManager, requestNotificationPermissionIfNeeded } from '../lib/alerts';
+      import { track } from '../lib/analytics';
+      import type { AppSettings } from '../lib/types';
+
+      const t = window.__BMA__.t;
+
+      const $ = <T extends HTMLElement = HTMLElement>(selector: string): T => {
+        const el = document.querySelector<T>(selector);
+        if (!el) throw new Error(`Missing element: ${selector}`);
+        return el;
+      };
+
+      const statusDot = $('[data-status-dot]');
+      const statusLabel = $('[data-status-label]');
+      const volumeFill = $<HTMLDivElement>('[data-volume-fill]');
+      const volumeThreshold = $<HTMLDivElement>('[data-volume-threshold]');
+      const volumeReadout = $('[data-volume-readout]');
+      const inputDuration = $<HTMLInputElement>('[data-input-duration]');
+      const inputThreshold = $<HTMLInputElement>('[data-input-threshold]');
+      const thresholdReadout = $('[data-threshold-readout]');
+      const inputAlarmSound = $<HTMLInputElement>('[data-input-alarm-sound]');
+      const inputNotification = $<HTMLInputElement>('[data-input-notification]');
+      const startBtn = $<HTMLButtonElement>('[data-action-start]');
+      const stopBtn = $<HTMLButtonElement>('[data-action-stop]');
+      const errorEl = $<HTMLParagraphElement>('[data-error]');
+      const modal = $<HTMLDivElement>('[data-modal]');
+      const modalTitle = $('[data-modal-title]');
+      const modalBody = $('[data-modal-body]');
+      const modalDismiss = $<HTMLButtonElement>('[data-modal-dismiss]');
+      modalDismiss.textContent = t.alertDismiss;
+
+      const settings = loadSettings();
+      inputDuration.value = String(settings.silenceDurationSec);
+      inputThreshold.value = String(settings.silenceThresholdDb);
+      inputAlarmSound.checked = settings.alarmSoundEnabled;
+      inputNotification.checked = settings.notificationEnabled;
+      updateThresholdReadout(settings.silenceThresholdDb);
+      updateThresholdMarker(settings.silenceThresholdDb);
+
+      const alertManager = new AlertManager();
+
+      let detector: SilenceDetector | null = null;
+      let stream: MediaStream | null = null;
+      let listeningStartedAt: number | null = null;
+      let alertedAt: number | null = null;
+
+      function clampNumber(value: number, min: number, max: number): number {
+        return Math.min(Math.max(value, min), max);
+      }
+
+      function readSettings(): AppSettings {
+        const duration = clampNumber(
+          Number(inputDuration.value) || 30,
+          SETTINGS_LIMITS.silenceDurationSec.min,
+          SETTINGS_LIMITS.silenceDurationSec.max,
+        );
+        const threshold = clampNumber(
+          Number(inputThreshold.value) || -50,
+          SETTINGS_LIMITS.silenceThresholdDb.min,
+          SETTINGS_LIMITS.silenceThresholdDb.max,
+        );
+        return {
+          silenceDurationSec: duration,
+          silenceThresholdDb: threshold,
+          alarmSoundEnabled: inputAlarmSound.checked,
+          notificationEnabled: inputNotification.checked,
+        };
+      }
+
+      function persist(): void {
+        saveSettings(readSettings());
+      }
+
+      function updateThresholdReadout(db: number): void {
+        thresholdReadout.textContent = `${db} dB`;
+      }
+
+      function updateThresholdMarker(db: number): void {
+        // -80 → 0%, -20 → 100%
+        const pct = clampNumber(((db + 80) / 60) * 100, 0, 100);
+        volumeThreshold.style.left = `${pct}%`;
+      }
+
+      function updateVolumeBar(db: number): void {
+        const pct = clampNumber(((db + 80) / 60) * 100, 0, 100);
+        volumeFill.style.width = `${pct}%`;
+        volumeReadout.textContent = `${Math.round(db)} dB`;
+      }
+
+      function setStatus(state: 'idle' | 'listening' | 'alerted'): void {
+        statusDot.dataset.state = state;
+        if (state === 'idle') statusLabel.textContent = t.statusIdle;
+        else if (state === 'listening') statusLabel.textContent = t.statusListening;
+        else statusLabel.textContent = t.statusAlerted;
+      }
+
+      function showError(message: string): void {
+        errorEl.textContent = message;
+        errorEl.hidden = false;
+      }
+
+      function clearError(): void {
+        errorEl.textContent = '';
+        errorEl.hidden = true;
+      }
+
+      function stopMonitoring(reason: 'user_clicked' | 'track_ended'): void {
+        if (!detector && !stream) return;
+        const wasFor = listeningStartedAt ? Math.round((Date.now() - listeningStartedAt) / 1000) : 0;
+        detector?.stop();
+        detector = null;
+        stream?.getTracks().forEach((track) => track.stop());
+        stream = null;
+        listeningStartedAt = null;
+        setStatus('idle');
+        updateVolumeBar(-80);
+        startBtn.hidden = false;
+        stopBtn.hidden = true;
+        if (reason === 'user_clicked') {
+          track('stop_monitoring', { reason });
+        } else {
+          track('screen_share_track_ended', { was_monitoring_for_sec: wasFor });
+        }
+      }
+
+      async function startMonitoring(): Promise<void> {
+        clearError();
+        const cfg = readSettings();
+        persist();
+
+        if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getDisplayMedia) {
+          showError(t.errorUnsupportedBrowser);
+          return;
+        }
+
+        const notificationsAllowed = await requestNotificationPermissionIfNeeded(cfg.notificationEnabled);
+
+        let media: MediaStream;
+        try {
+          media = await navigator.mediaDevices.getDisplayMedia({
+            video: { displaySurface: 'browser' },
+            audio: true,
+            // @ts-expect-error - non-standard but widely supported in Chromium
+            selfBrowserSurface: 'exclude',
+            systemAudio: 'include',
+            preferCurrentTab: false,
+          });
+        } catch (err) {
+          if (err instanceof DOMException && err.name === 'NotAllowedError') {
+            track('screen_share_cancelled');
+            showError(t.errorPermissionDenied);
+          } else {
+            showError(t.errorGeneric);
+          }
+          return;
+        }
+
+        const audioTracks = media.getAudioTracks();
+        if (audioTracks.length === 0) {
+          media.getTracks().forEach((track) => track.stop());
+          track('no_audio_track');
+          showError(t.errorNoAudioTrack);
+          return;
+        }
+        media.getVideoTracks().forEach((track) => track.stop());
+
+        stream = new MediaStream(audioTracks);
+        listeningStartedAt = Date.now();
+        const firstAudioTrack = audioTracks[0]!;
+        firstAudioTrack.onended = () => stopMonitoring('track_ended');
+
+        detector = new SilenceDetector({
+          stream,
+          thresholdDb: cfg.silenceThresholdDb,
+          durationSec: cfg.silenceDurationSec,
+          onLevel: (db) => updateVolumeBar(db),
+          onSilenceDetected: () => onSilenceDetected(cfg, notificationsAllowed),
+        });
+        detector.start();
+
+        setStatus('listening');
+        startBtn.hidden = true;
+        stopBtn.hidden = false;
+
+        track('start_monitoring', {
+          silence_duration_sec: cfg.silenceDurationSec,
+          silence_threshold_db: cfg.silenceThresholdDb,
+          alarm_sound_enabled: cfg.alarmSoundEnabled,
+          notification_enabled: cfg.notificationEnabled,
+        });
+      }
+
+      function onSilenceDetected(cfg: AppSettings, notificationsAllowed: boolean): void {
+        setStatus('alerted');
+        alertedAt = Date.now();
+        track('silence_detected', { silence_duration_sec: cfg.silenceDurationSec });
+        alertManager.trigger({
+          modal,
+          modalTitle,
+          modalBody,
+          notificationEnabled: cfg.notificationEnabled && notificationsAllowed,
+          alarmSoundEnabled: cfg.alarmSoundEnabled,
+        });
+      }
+
+      function dismissAlert(): void {
+        const secondsToDismiss = alertedAt ? Math.round((Date.now() - alertedAt) / 1000) : 0;
+        alertedAt = null;
+        alertManager.dismiss({ modal });
+        stopMonitoring('user_clicked');
+        track('silence_alert_dismissed', { seconds_to_dismiss: secondsToDismiss });
+      }
+
+      startBtn.addEventListener('click', () => {
+        void startMonitoring();
+      });
+      stopBtn.addEventListener('click', () => stopMonitoring('user_clicked'));
+      modalDismiss.addEventListener('click', dismissAlert);
+
+      inputDuration.addEventListener('change', persist);
+      inputThreshold.addEventListener('input', () => {
+        const db = Number(inputThreshold.value);
+        updateThresholdReadout(db);
+        updateThresholdMarker(db);
+      });
+      inputThreshold.addEventListener('change', persist);
+      inputAlarmSound.addEventListener('change', persist);
+      inputNotification.addEventListener('change', persist);
+
+      // Initial state
+      setStatus('idle');
+      updateVolumeBar(-80);
+
+      // Feature detection up front to give a friendly heads-up
+      if (typeof navigator !== 'undefined' && !navigator.mediaDevices?.getDisplayMedia) {
+        showError(t.errorUnsupportedBrowser);
+        startBtn.disabled = true;
+      }
+    </script>
+  </body>
+</html>
