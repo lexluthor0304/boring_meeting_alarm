@@ -222,6 +222,79 @@ body {
   color: var(--accent);
 }
 
+.post-description {
+  font-size: 1rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0 0 1.5rem;
+  padding-left: 0.75rem;
+  border-left: 3px solid var(--border);
+}
+
+.post-list {
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+}
+
+.post-list-item {
+  padding: 1.25rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.post-list-item:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.post-list-item h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+}
+
+.post-list-item h2 a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.post-list-item h2 a:hover {
+  color: var(--accent);
+}
+
+.post-list-meta {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0 0 0.5rem;
+}
+
+.read-more {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+}
+
+.prose pre {
+  background: var(--surface-alt);
+  padding: 0.85rem 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  margin: 0 0 1rem;
+}
+
+.prose pre code {
+  background: transparent;
+  padding: 0;
+  font-size: inherit;
+}
+
+.prose blockquote {
+  border-left: 3px solid var(--border);
+  padding-left: 1rem;
+  margin: 0 0 1rem;
+  color: var(--text-muted);
+}
+
 .faq {
   background: var(--surface);
   border: 1px solid var(--border);

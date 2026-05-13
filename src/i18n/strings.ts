@@ -49,6 +49,13 @@ type StringMap = {
   privacyLastUpdatedLabel: string;
   privacyBackToTool: string;
   footerPrivacyLink: string;
+  blogIndexTitle: string;
+  blogIndexDescription: string;
+  blogPublishedLabel: string;
+  blogUpdatedLabel: string;
+  blogReadMore: string;
+  blogBackToIndex: string;
+  footerBlogLink: string;
 };
 
 export const strings: Record<Locale, StringMap> = {
@@ -131,6 +138,14 @@ export const strings: Record<Locale, StringMap> = {
     privacyLastUpdatedLabel: 'Last updated',
     privacyBackToTool: '← Back to the tool',
     footerPrivacyLink: 'Privacy',
+    blogIndexTitle: 'Blog',
+    blogIndexDescription:
+      'Engineering notes from building Boring Meeting Alarm — Web Audio, getDisplayMedia, browser quirks, and the small choices behind a one-page tool.',
+    blogPublishedLabel: 'Published',
+    blogUpdatedLabel: 'Updated',
+    blogReadMore: 'Read post →',
+    blogBackToIndex: '← All posts',
+    footerBlogLink: 'Blog',
   },
   zh: {
     htmlLang: 'zh-CN',
@@ -206,6 +221,14 @@ export const strings: Record<Locale, StringMap> = {
     privacyLastUpdatedLabel: '最后更新',
     privacyBackToTool: '← 返回工具',
     footerPrivacyLink: '隐私政策',
+    blogIndexTitle: '博客',
+    blogIndexDescription:
+      '会议静音提醒背后的工程笔记：Web Audio、getDisplayMedia、浏览器细节，以及做一个单页工具时的小决策。',
+    blogPublishedLabel: '发布',
+    blogUpdatedLabel: '更新',
+    blogReadMore: '阅读全文 →',
+    blogBackToIndex: '← 所有文章',
+    footerBlogLink: '博客',
   },
   ja: {
     htmlLang: 'ja',
@@ -285,5 +308,13 @@ export const strings: Record<Locale, StringMap> = {
     privacyLastUpdatedLabel: '最終更新',
     privacyBackToTool: '← ツールに戻る',
     footerPrivacyLink: 'プライバシー',
+    blogIndexTitle: 'ブログ',
+    blogIndexDescription:
+      '会議サイレントアラームを作るときのエンジニアリングメモ：Web Audio、getDisplayMedia、ブラウザの細かい挙動、1 ページのツール作りで考えたことたち。',
+    blogPublishedLabel: '公開日',
+    blogUpdatedLabel: '更新日',
+    blogReadMore: '記事を読む →',
+    blogBackToIndex: '← 記事一覧',
+    footerBlogLink: 'ブログ',
   },
 };

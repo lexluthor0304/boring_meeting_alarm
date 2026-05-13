@@ -1,0 +1,86 @@
+---
+import { getCollection } from 'astro:content';
+import { strings, type Locale } from '../i18n/strings';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = strings[locale];
+
+const posts = (await getCollection('blog'))
+  .filter((p) => p.data.locale === locale)
+  .sort((a, b) => b.data.datePublished.localeCompare(a.data.datePublished));
+
+const siteOrigin = 'https://alarm.tokugai.com';
+const pagePath = locale === 'en' ? '/blog/' : `/${locale}/blog/`;
+const canonicalUrl = `${siteOrigin}${pagePath}`;
+const toolPath = locale === 'en' ? '/' : `/${locale}/`;
+
+function postPath(slug: string): string {
+  return locale === 'en' ? `/blog/${slug}/` : `/${locale}/blog/${slug}/`;
+}
+
+const blogJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Blog',
+  '@id': canonicalUrl,
+  name: t.blogIndexTitle,
+  url: canonicalUrl,
+  description: t.blogIndexDescription,
+  inLanguage: t.htmlLang,
+  blogPost: posts.map((p) => ({
+    '@type': 'BlogPosting',
+    headline: p.data.title,
+    url: `${siteOrigin}${postPath(p.data.slug)}`,
+    datePublished: p.data.datePublished,
+    dateModified: p.data.dateModified ?? p.data.datePublished,
+    author: { '@type': 'Person', name: p.data.author },
+    description: p.data.description,
+  })),
+};
+---
+<BaseLayout
+  locale={locale}
+  pagePath={pagePath}
+  pageTitle={`${t.blogIndexTitle} — ${t.title}`}
+  pageDescription={t.blogIndexDescription}
+>
+  <Fragment slot="head">
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(blogJsonLd)} />
+  </Fragment>
+
+  <main class="app prose-page">
+    <article class="prose">
+      <h1>{t.blogIndexTitle}</h1>
+      <p class="page-meta">{t.blogIndexDescription}</p>
+
+      <ul class="post-list">
+        {posts.map((post) => (
+          <li class="post-list-item">
+            <h2><a href={postPath(post.data.slug)}>{post.data.title}</a></h2>
+            <p class="post-list-meta">
+              <time datetime={post.data.datePublished}>{post.data.datePublished}</time>
+              {post.data.tags.length > 0 && (
+                <>
+                  <span aria-hidden="true"> · </span>
+                  <span>{post.data.tags.join(' · ')}</span>
+                </>
+              )}
+            </p>
+            <p>{post.data.description}</p>
+            <p class="read-more">
+              <a href={postPath(post.data.slug)}>{t.blogReadMore}</a>
+            </p>
+          </li>
+        ))}
+      </ul>
+
+      <p class="back-link">
+        <a href={toolPath}>{t.privacyBackToTool}</a>
+      </p>
+    </article>
+  </main>
+</BaseLayout>
