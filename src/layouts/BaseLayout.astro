@@ -1,0 +1,200 @@
+---
+import { strings, type Locale } from '../i18n/strings';
+import LanguageSwitcher from '../components/LanguageSwitcher.astro';
+import '../styles/global.css';
+
+interface Props {
+  locale: Locale;
+  /** Locale-independent page path, e.g. "/" or "/privacy/". */
+  pagePath: string;
+  pageTitle?: string;
+  pageDescription?: string;
+}
+
+const { locale, pagePath, pageTitle, pageDescription } = Astro.props;
+const t = strings[locale];
+const gaId = import.meta.env.PUBLIC_GA_ID;
+const adsenseClient = import.meta.env.PUBLIC_ADSENSE_CLIENT_ID;
+
+const siteOrigin = 'https://alarm.tokugai.com';
+const repoUrl = 'https://github.com/lexluthor0304/boring_meeting_alarm';
+const lastUpdated = '2026-05-13';
+
+function pathForLocaleAndPage(loc: Locale): string {
+  if (loc === 'en') return pagePath;
+  if (pagePath === '/') return `/${loc}/`;
+  return `/${loc}${pagePath}`;
+}
+
+const canonicalUrl = `${siteOrigin}${pathForLocaleAndPage(locale)}`;
+const relativePath = pagePath === '/' ? '' : pagePath.replace(/^\//, '');
+
+const title = pageTitle ?? t.title;
+const description = pageDescription ?? t.metaDescription;
+
+const hreflangs = [
+  { hreflang: 'en', href: `${siteOrigin}${pathForLocaleAndPage('en')}` },
+  { hreflang: 'zh', href: `${siteOrigin}${pathForLocaleAndPage('zh')}` },
+  { hreflang: 'ja', href: `${siteOrigin}${pathForLocaleAndPage('ja')}` },
+  { hreflang: 'x-default', href: `${siteOrigin}${pathForLocaleAndPage('en')}` },
+];
+
+const privacyPath = locale === 'en' ? '/privacy/' : `/${locale}/privacy/`;
+---
+<!doctype html>
+<html lang={t.htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content="tokugai" />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E%F0%9F%94%94%3C/text%3E%3C/svg%3E" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:locale" content={t.htmlLang.replace('-', '_')} />
+    <meta name="twitter:card" content="summary" />
+
+    {hreflangs.map(({ hreflang, href }) => (
+      <link rel="alternate" hreflang={hreflang} href={href} />
+    ))}
+
+    <script is:inline async defer src="https://buttons.github.io/buttons.js"></script>
+
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ window.dataLayer.push(arguments); }
+      window.gtag = gtag;
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+        wait_for_update: 500,
+      });
+      try {
+        if (localStorage.getItem('bma:consent') === 'granted') {
+          gtag('consent', 'update', {
+            ad_storage: 'granted',
+            ad_user_data: 'granted',
+            ad_personalization: 'granted',
+            analytics_storage: 'granted',
+          });
+        }
+      } catch (_) {}
+    </script>
+
+    {gaId && (
+      <>
+        <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
+        <script is:inline define:vars={{ gaId }}>
+          gtag('js', new Date());
+          gtag('config', gaId);
+        </script>
+      </>
+    )}
+
+    {adsenseClient && (
+      <>
+        <meta name="google-adsense-account" content={adsenseClient} />
+        <script
+          is:inline
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
+          crossorigin="anonymous"
+        ></script>
+      </>
+    )}
+
+    <script is:inline define:vars={{ t, locale }}>
+      window.__BMA__ = { t, locale };
+    </script>
+
+    <slot name="head" />
+  </head>
+  <body>
+    <header class="top-bar">
+      <h1 class="app-title"><a href={pathForLocaleAndPage(locale)}>{t.title}</a></h1>
+      <LanguageSwitcher current={locale} relativePath={relativePath} />
+    </header>
+
+    <slot />
+
+    <footer class="footer">
+      <p>{t.footerTip}</p>
+      <div class="github-buttons">
+        <a
+          class="github-button"
+          href={repoUrl}
+          data-color-scheme="no-preference: light; light: light; dark: dark;"
+          data-icon="octicon-star"
+          data-size="large"
+          data-show-count="true"
+          aria-label="Star lexluthor0304/boring_meeting_alarm on GitHub"
+        >Star</a>
+        <a
+          class="github-button"
+          href={`${repoUrl}/fork`}
+          data-color-scheme="no-preference: light; light: light; dark: dark;"
+          data-icon="octicon-repo-forked"
+          data-size="large"
+          data-show-count="true"
+          aria-label="Fork lexluthor0304/boring_meeting_alarm on GitHub"
+        >Fork</a>
+      </div>
+      <p class="footer-meta">
+        <span>{t.footerBuilder}</span>
+        <span aria-hidden="true">·</span>
+        <span>{t.footerUpdatedPrefix}<time datetime={lastUpdated}>{lastUpdated}</time></span>
+        <span aria-hidden="true">·</span>
+        <a href={privacyPath}>{t.footerPrivacyLink}</a>
+      </p>
+    </footer>
+
+    <div class="consent-banner" data-consent-banner hidden role="region" aria-label="Cookie consent">
+      <p class="consent-message">{t.consentMessage}</p>
+      <div class="consent-actions">
+        <button type="button" class="secondary" data-consent-reject>{t.consentReject}</button>
+        <button type="button" class="primary" data-consent-accept>{t.consentAccept}</button>
+      </div>
+    </div>
+
+    <slot name="end" />
+
+    <script>
+      const CONSENT_KEY = 'bma:consent';
+      const banner = document.querySelector<HTMLDivElement>('[data-consent-banner]');
+      const acceptBtn = document.querySelector<HTMLButtonElement>('[data-consent-accept]');
+      const rejectBtn = document.querySelector<HTMLButtonElement>('[data-consent-reject]');
+
+      let decision: string | null = null;
+      try { decision = localStorage.getItem(CONSENT_KEY); } catch {}
+      if (banner && !decision) banner.hidden = false;
+
+      function persist(value: 'granted' | 'denied'): void {
+        try { localStorage.setItem(CONSENT_KEY, value); } catch {}
+      }
+
+      acceptBtn?.addEventListener('click', () => {
+        persist('granted');
+        window.gtag?.('consent', 'update', {
+          ad_storage: 'granted',
+          ad_user_data: 'granted',
+          ad_personalization: 'granted',
+          analytics_storage: 'granted',
+        });
+        if (banner) banner.hidden = true;
+      });
+
+      rejectBtn?.addEventListener('click', () => {
+        persist('denied');
+        if (banner) banner.hidden = true;
+      });
+    </script>
+  </body>
+</html>

@@ -1,7 +1,6 @@
 ---
 import { strings, type Locale } from '../i18n/strings';
-import LanguageSwitcher from './LanguageSwitcher.astro';
-import '../styles/global.css';
+import BaseLayout from '../layouts/BaseLayout.astro';
 
 interface Props {
   locale: Locale;
@@ -9,26 +8,11 @@ interface Props {
 
 const { locale } = Astro.props;
 const t = strings[locale];
-const gaId = import.meta.env.PUBLIC_GA_ID;
-const adsenseClient = import.meta.env.PUBLIC_ADSENSE_CLIENT_ID;
 
 const siteOrigin = 'https://alarm.tokugai.com';
 const repoUrl = 'https://github.com/lexluthor0304/boring_meeting_alarm';
 const lastUpdated = '2026-05-13';
-
-const localePaths: Record<Locale, string> = {
-  en: '/',
-  zh: '/zh/',
-  ja: '/ja/',
-};
-const canonicalUrl = `${siteOrigin}${localePaths[locale]}`;
-
-const hreflangs: { hreflang: string; href: string }[] = [
-  { hreflang: 'en', href: `${siteOrigin}/` },
-  { hreflang: 'zh', href: `${siteOrigin}/zh/` },
-  { hreflang: 'ja', href: `${siteOrigin}/ja/` },
-  { hreflang: 'x-default', href: `${siteOrigin}/` },
-];
+const canonicalUrl = `${siteOrigin}${locale === 'en' ? '/' : `/${locale}/`}`;
 
 const softwareJsonLd = {
   '@context': 'https://schema.org',
@@ -71,203 +55,90 @@ const howToJsonLd = {
   })),
 };
 ---
-<!doctype html>
-<html lang={t.htmlLang}>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="light dark" />
-    <title>{t.title}</title>
-    <meta name="description" content={t.metaDescription} />
-    <meta name="author" content="tokugai" />
-    <link rel="canonical" href={canonicalUrl} />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E%F0%9F%94%94%3C/text%3E%3C/svg%3E" />
-
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content={t.title} />
-    <meta property="og:description" content={t.metaDescription} />
-    <meta property="og:url" content={canonicalUrl} />
-    <meta property="og:locale" content={t.htmlLang.replace('-', '_')} />
-    <meta name="twitter:card" content="summary" />
-
-    {hreflangs.map(({ hreflang, href }) => (
-      <link rel="alternate" hreflang={hreflang} href={href} />
-    ))}
-
+<BaseLayout locale={locale} pagePath="/">
+  <Fragment slot="head">
     <script is:inline type="application/ld+json" set:html={JSON.stringify(softwareJsonLd)} />
     <script is:inline type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
     <script is:inline type="application/ld+json" set:html={JSON.stringify(howToJsonLd)} />
+  </Fragment>
 
-    <script is:inline async defer src="https://buttons.github.io/buttons.js"></script>
+  <main class="app">
+    <p class="intro">{t.intro}</p>
 
-    <script is:inline>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){ window.dataLayer.push(arguments); }
-      window.gtag = gtag;
-      gtag('consent', 'default', {
-        ad_storage: 'denied',
-        ad_user_data: 'denied',
-        ad_personalization: 'denied',
-        analytics_storage: 'denied',
-        wait_for_update: 500,
-      });
-      try {
-        if (localStorage.getItem('bma:consent') === 'granted') {
-          gtag('consent', 'update', {
-            ad_storage: 'granted',
-            ad_user_data: 'granted',
-            ad_personalization: 'granted',
-            analytics_storage: 'granted',
-          });
-        }
-      } catch (_) {}
-    </script>
-
-    {gaId && (
-      <>
-        <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
-        <script is:inline define:vars={{ gaId }}>
-          gtag('js', new Date());
-          gtag('config', gaId);
-        </script>
-      </>
-    )}
-
-    {adsenseClient && (
-      <>
-        <meta name="google-adsense-account" content={adsenseClient} />
-        <script
-          is:inline
-          async
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
-          crossorigin="anonymous"
-        ></script>
-      </>
-    )}
-
-    <script is:inline define:vars={{ t, locale }}>
-      window.__BMA__ = { t, locale };
-    </script>
-  </head>
-  <body>
-    <header class="top-bar">
-      <h1 class="app-title">{t.title}</h1>
-      <LanguageSwitcher current={locale} />
-    </header>
-
-    <main class="app">
-      <p class="intro">{t.intro}</p>
-
-      <section class="status-card" aria-live="polite">
-        <div class="status-row">
-          <span class="status-dot" data-status-dot></span>
-          <span class="status-label" data-status-label>{t.statusIdle}</span>
-        </div>
-
-        <div class="volume-row">
-          <span class="volume-caption">{t.currentVolume}</span>
-          <div class="volume-bar" aria-hidden="true">
-            <div class="volume-bar-fill" data-volume-fill></div>
-            <div class="volume-bar-threshold" data-volume-threshold></div>
-          </div>
-          <span class="volume-readout" data-volume-readout>—</span>
-        </div>
-      </section>
-
-      <section class="settings-card">
-        <label class="field" for="bma-duration">
-          <span class="field-label">{t.silenceDurationLabel}</span>
-          <span class="field-control">
-            <input id="bma-duration" name="bma-duration" type="number" data-input-duration min="5" max="3600" step="1" />
-            <span class="field-unit">{t.seconds}</span>
-          </span>
-        </label>
-
-        <label class="field" for="bma-threshold">
-          <span class="field-label">
-            {t.thresholdLabel}
-            <span class="field-value" data-threshold-readout>—</span>
-          </span>
-          <input id="bma-threshold" name="bma-threshold" type="range" data-input-threshold min="-80" max="-20" step="1" class="range-input" />
-          <span class="field-hint">{t.thresholdHint}</span>
-        </label>
-
-        <label class="checkbox" for="bma-alarm-sound">
-          <input id="bma-alarm-sound" name="bma-alarm-sound" type="checkbox" data-input-alarm-sound />
-          <span>{t.playAlarmSound}</span>
-        </label>
-
-        <label class="checkbox" for="bma-notification">
-          <input id="bma-notification" name="bma-notification" type="checkbox" data-input-notification />
-          <span>{t.enableNotification}</span>
-        </label>
-      </section>
-
-      <section class="action-row">
-        <button type="button" class="primary" data-action-start>{t.startMonitoring}</button>
-        <button type="button" class="secondary" data-action-stop hidden>{t.stopMonitoring}</button>
-      </section>
-
-      <p class="error-message" data-error hidden></p>
-
-      <section class="instructions">
-        <h2>{t.instructionsTitle}</h2>
-        <ol>
-          <li>{t.instruction1}</li>
-          <li>{t.instruction2}</li>
-          <li>{t.instruction3}</li>
-        </ol>
-        <p class="browser-hint">{t.browserHint}</p>
-      </section>
-
-      <section class="faq">
-        <h2>{t.faqTitle}</h2>
-        {t.faq.map((item) => (
-          <article class="faq-item">
-            <h3>{item.q}</h3>
-            <p>{item.a}</p>
-          </article>
-        ))}
-      </section>
-    </main>
-
-    <footer class="footer">
-      <p>{t.footerTip}</p>
-      <div class="github-buttons">
-        <a
-          class="github-button"
-          href={repoUrl}
-          data-color-scheme="no-preference: light; light: light; dark: dark;"
-          data-icon="octicon-star"
-          data-size="large"
-          data-show-count="true"
-          aria-label="Star lexluthor0304/boring_meeting_alarm on GitHub"
-        >Star</a>
-        <a
-          class="github-button"
-          href={`${repoUrl}/fork`}
-          data-color-scheme="no-preference: light; light: light; dark: dark;"
-          data-icon="octicon-repo-forked"
-          data-size="large"
-          data-show-count="true"
-          aria-label="Fork lexluthor0304/boring_meeting_alarm on GitHub"
-        >Fork</a>
+    <section class="status-card" aria-live="polite">
+      <div class="status-row">
+        <span class="status-dot" data-status-dot></span>
+        <span class="status-label" data-status-label>{t.statusIdle}</span>
       </div>
-      <p class="footer-meta">
-        <span>{t.footerBuilder}</span>
-        <span aria-hidden="true">·</span>
-        <span>{t.footerUpdatedPrefix}<time datetime={lastUpdated}>{lastUpdated}</time></span>
-      </p>
-    </footer>
 
-    <div class="consent-banner" data-consent-banner hidden role="region" aria-label="Cookie consent">
-      <p class="consent-message">{t.consentMessage}</p>
-      <div class="consent-actions">
-        <button type="button" class="secondary" data-consent-reject>{t.consentReject}</button>
-        <button type="button" class="primary" data-consent-accept>{t.consentAccept}</button>
+      <div class="volume-row">
+        <span class="volume-caption">{t.currentVolume}</span>
+        <div class="volume-bar" aria-hidden="true">
+          <div class="volume-bar-fill" data-volume-fill></div>
+          <div class="volume-bar-threshold" data-volume-threshold></div>
+        </div>
+        <span class="volume-readout" data-volume-readout>—</span>
       </div>
-    </div>
+    </section>
 
+    <section class="settings-card">
+      <label class="field" for="bma-duration">
+        <span class="field-label">{t.silenceDurationLabel}</span>
+        <span class="field-control">
+          <input id="bma-duration" name="bma-duration" type="number" data-input-duration min="5" max="3600" step="1" />
+          <span class="field-unit">{t.seconds}</span>
+        </span>
+      </label>
+
+      <label class="field" for="bma-threshold">
+        <span class="field-label">
+          {t.thresholdLabel}
+          <span class="field-value" data-threshold-readout>—</span>
+        </span>
+        <input id="bma-threshold" name="bma-threshold" type="range" data-input-threshold min="-80" max="-20" step="1" class="range-input" />
+        <span class="field-hint">{t.thresholdHint}</span>
+      </label>
+
+      <label class="checkbox" for="bma-alarm-sound">
+        <input id="bma-alarm-sound" name="bma-alarm-sound" type="checkbox" data-input-alarm-sound />
+        <span>{t.playAlarmSound}</span>
+      </label>
+
+      <label class="checkbox" for="bma-notification">
+        <input id="bma-notification" name="bma-notification" type="checkbox" data-input-notification />
+        <span>{t.enableNotification}</span>
+      </label>
+    </section>
+
+    <section class="action-row">
+      <button type="button" class="primary" data-action-start>{t.startMonitoring}</button>
+      <button type="button" class="secondary" data-action-stop hidden>{t.stopMonitoring}</button>
+    </section>
+
+    <p class="error-message" data-error hidden></p>
+
+    <section class="instructions">
+      <h2>{t.instructionsTitle}</h2>
+      <ol>
+        <li>{t.instruction1}</li>
+        <li>{t.instruction2}</li>
+        <li>{t.instruction3}</li>
+      </ol>
+      <p class="browser-hint">{t.browserHint}</p>
+    </section>
+
+    <section class="faq">
+      <h2>{t.faqTitle}</h2>
+      {t.faq.map((item) => (
+        <article class="faq-item">
+          <h3>{item.q}</h3>
+          <p>{item.a}</p>
+        </article>
+      ))}
+    </section>
+  </main>
+
+  <Fragment slot="end">
     <div class="modal" data-modal hidden role="alertdialog" aria-modal="true" aria-labelledby="modal-title">
       <div class="modal-content">
         <h2 id="modal-title" data-modal-title></h2>
@@ -309,37 +180,6 @@ const howToJsonLd = {
       const modalBody = $('[data-modal-body]');
       const modalDismiss = $<HTMLButtonElement>('[data-modal-dismiss]');
       modalDismiss.textContent = t.alertDismiss;
-      const consentBanner = $<HTMLDivElement>('[data-consent-banner]');
-      const consentAcceptBtn = $<HTMLButtonElement>('[data-consent-accept]');
-      const consentRejectBtn = $<HTMLButtonElement>('[data-consent-reject]');
-
-      const CONSENT_KEY = 'bma:consent';
-      const consentDecision = (() => {
-        try { return localStorage.getItem(CONSENT_KEY); } catch { return null; }
-      })();
-      if (!consentDecision) {
-        consentBanner.hidden = false;
-      }
-
-      function persistConsent(decision: 'granted' | 'denied'): void {
-        try { localStorage.setItem(CONSENT_KEY, decision); } catch {}
-      }
-
-      consentAcceptBtn.addEventListener('click', () => {
-        persistConsent('granted');
-        window.gtag?.('consent', 'update', {
-          ad_storage: 'granted',
-          ad_user_data: 'granted',
-          ad_personalization: 'granted',
-          analytics_storage: 'granted',
-        });
-        consentBanner.hidden = true;
-      });
-
-      consentRejectBtn.addEventListener('click', () => {
-        persistConsent('denied');
-        consentBanner.hidden = true;
-      });
 
       const settings = loadSettings();
       inputDuration.value = String(settings.silenceDurationSec);
@@ -388,7 +228,6 @@ const howToJsonLd = {
       }
 
       function updateThresholdMarker(db: number): void {
-        // -80 → 0%, -20 → 100%
         const pct = clampNumber(((db + 80) / 60) * 100, 0, 100);
         volumeThreshold.style.left = `${pct}%`;
       }
@@ -539,15 +378,13 @@ const howToJsonLd = {
       inputAlarmSound.addEventListener('change', persist);
       inputNotification.addEventListener('change', persist);
 
-      // Initial state
       setStatus('idle');
       updateVolumeBar(-80);
 
-      // Feature detection up front to give a friendly heads-up
       if (typeof navigator !== 'undefined' && !navigator.mediaDevices?.getDisplayMedia) {
         showError(t.errorUnsupportedBrowser);
         startBtn.disabled = true;
       }
     </script>
-  </body>
-</html>
+  </Fragment>
+</BaseLayout>
