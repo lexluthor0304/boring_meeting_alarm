@@ -40,6 +40,7 @@ const hreflangs = [
 ];
 
 const privacyPath = locale === 'en' ? '/privacy/' : `/${locale}/privacy/`;
+const blogPath = locale === 'en' ? '/blog/' : `/${locale}/blog/`;
 ---
 <!doctype html>
 <html lang={t.htmlLang}>
@@ -151,6 +152,8 @@ const privacyPath = locale === 'en' ? '/privacy/' : `/${locale}/privacy/`;
         <span>{t.footerBuilder}</span>
         <span aria-hidden="true">·</span>
         <span>{t.footerUpdatedPrefix}<time datetime={lastUpdated}>{lastUpdated}</time></span>
+        <span aria-hidden="true">·</span>
+        <a href={blogPath}>{t.footerBlogLink}</a>
         <span aria-hidden="true">·</span>
         <a href={privacyPath}>{t.footerPrivacyLink}</a>
       </p>
