@@ -13,12 +13,63 @@ const gaId = import.meta.env.PUBLIC_GA_ID;
 const adsenseClient = import.meta.env.PUBLIC_ADSENSE_CLIENT_ID;
 
 const siteOrigin = 'https://alarm.tokugai.com';
+const repoUrl = 'https://github.com/lexluthor0304/boring_meeting_alarm';
+const lastUpdated = '2026-05-13';
+
+const localePaths: Record<Locale, string> = {
+  en: '/',
+  zh: '/zh/',
+  ja: '/ja/',
+};
+const canonicalUrl = `${siteOrigin}${localePaths[locale]}`;
+
 const hreflangs: { hreflang: string; href: string }[] = [
   { hreflang: 'en', href: `${siteOrigin}/` },
   { hreflang: 'zh', href: `${siteOrigin}/zh/` },
   { hreflang: 'ja', href: `${siteOrigin}/ja/` },
   { hreflang: 'x-default', href: `${siteOrigin}/` },
 ];
+
+const softwareJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: t.title,
+  url: canonicalUrl,
+  description: t.intro,
+  applicationCategory: 'UtilitiesApplication',
+  operatingSystem: 'Web (Chromium-based browsers)',
+  browserRequirements: 'Requires getDisplayMedia and Web Audio API (Chrome 91+, Edge 91+).',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  creator: { '@type': 'Person', name: 'tokugai' },
+  inLanguage: ['en', 'zh-CN', 'ja'],
+  sameAs: [repoUrl],
+  dateModified: lastUpdated,
+};
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  inLanguage: t.htmlLang,
+  mainEntity: t.faq.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: { '@type': 'Answer', text: item.a },
+  })),
+};
+
+const howToJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  inLanguage: t.htmlLang,
+  name: `${t.instructionsTitle} — ${t.title}`,
+  description: t.intro,
+  totalTime: 'PT1M',
+  step: [t.instruction1, t.instruction2, t.instruction3].map((text, idx) => ({
+    '@type': 'HowToStep',
+    position: idx + 1,
+    text,
+  })),
+};
 ---
 <!doctype html>
 <html lang={t.htmlLang}>
@@ -28,11 +79,24 @@ const hreflangs: { hreflang: string; href: string }[] = [
     <meta name="color-scheme" content="light dark" />
     <title>{t.title}</title>
     <meta name="description" content={t.metaDescription} />
+    <meta name="author" content="tokugai" />
+    <link rel="canonical" href={canonicalUrl} />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E%F0%9F%94%94%3C/text%3E%3C/svg%3E" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={t.title} />
+    <meta property="og:description" content={t.metaDescription} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:locale" content={t.htmlLang.replace('-', '_')} />
+    <meta name="twitter:card" content="summary" />
 
     {hreflangs.map(({ hreflang, href }) => (
       <link rel="alternate" hreflang={hreflang} href={href} />
     ))}
+
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(softwareJsonLd)} />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(howToJsonLd)} />
 
     <script is:inline>
       window.dataLayer = window.dataLayer || [];
@@ -90,7 +154,7 @@ const hreflangs: { hreflang: string; href: string }[] = [
     </header>
 
     <main class="app">
-      <p class="tagline">{t.tagline}</p>
+      <p class="intro">{t.intro}</p>
 
       <section class="status-card" aria-live="polite">
         <div class="status-row">
@@ -153,10 +217,27 @@ const hreflangs: { hreflang: string; href: string }[] = [
         </ol>
         <p class="browser-hint">{t.browserHint}</p>
       </section>
+
+      <section class="faq">
+        <h2>{t.faqTitle}</h2>
+        {t.faq.map((item) => (
+          <article class="faq-item">
+            <h3>{item.q}</h3>
+            <p>{item.a}</p>
+          </article>
+        ))}
+      </section>
     </main>
 
     <footer class="footer">
       <p>{t.footerTip}</p>
+      <p class="footer-meta">
+        <span>{t.footerBuilder}</span>
+        <span aria-hidden="true">·</span>
+        <span>{t.footerUpdatedPrefix}<time datetime={lastUpdated}>{lastUpdated}</time></span>
+        <span aria-hidden="true">·</span>
+        <a href={repoUrl} rel="noopener" target="_blank">{t.footerSource}</a>
+      </p>
     </footer>
 
     <div class="consent-banner" data-consent-banner hidden role="region" aria-label="Cookie consent">
