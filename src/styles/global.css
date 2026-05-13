@@ -153,8 +153,23 @@ body {
   color: var(--text-muted);
 }
 
+.github-buttons {
+  margin: 0.75rem 0 0;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  /* Reserve baseline height while buttons.js loads the iframe replacement,
+     so the footer doesn't shift when the buttons hydrate. */
+  min-height: 28px;
+}
+
+.github-buttons .github-button {
+  text-decoration: none;
+}
+
 .footer-meta {
-  margin: 0.5rem 0 0;
+  margin: 0.75rem 0 0;
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
