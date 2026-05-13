@@ -4,20 +4,28 @@ import { pathForLocale } from '../i18n/locale';
 
 interface Props {
   current: Locale;
+  /** Path suffix appended after the locale prefix, e.g. "privacy/". Empty for the home page. */
+  relativePath?: string;
 }
 
-const { current } = Astro.props;
+const { current, relativePath = '' } = Astro.props;
 
 const labels: Record<Locale, string> = {
   en: 'English',
   zh: '中文',
   ja: '日本語',
 };
+
+function hrefFor(loc: Locale): string {
+  const base = pathForLocale(loc);
+  if (!relativePath) return base;
+  return `${base}${relativePath}`;
+}
 ---
 <nav class="language-switcher" aria-label={strings[current].languageSwitcherLabel}>
   {locales.map((loc) => (
     <a
-      href={pathForLocale(loc)}
+      href={hrefFor(loc)}
       hreflang={strings[loc].htmlLang}
       lang={strings[loc].htmlLang}
       class:list={['lang-link', { 'is-current': loc === current }]}

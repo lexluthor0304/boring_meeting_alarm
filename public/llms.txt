@@ -28,6 +28,12 @@ A volume bar with live dB readout helps users pick a threshold while talking.
 - 简体中文: https://alarm.tokugai.com/zh/
 - 日本語: https://alarm.tokugai.com/ja/
 
+## Privacy
+
+- English: https://alarm.tokugai.com/privacy/
+- 简体中文: https://alarm.tokugai.com/zh/privacy/
+- 日本語: https://alarm.tokugai.com/ja/privacy/
+
 ## Pricing
 
 Free. No accounts. No tracking beyond opt-in Google Analytics. Hosted on Cloudflare Workers Static Assets.

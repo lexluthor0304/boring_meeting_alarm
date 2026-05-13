@@ -44,6 +44,11 @@ type StringMap = {
   footerBuilder: string;
   footerUpdatedPrefix: string;
   footerSource: string;
+  privacyPageTitle: string;
+  privacyPageMetaDescription: string;
+  privacyLastUpdatedLabel: string;
+  privacyBackToTool: string;
+  footerPrivacyLink: string;
 };
 
 export const strings: Record<Locale, StringMap> = {
@@ -120,6 +125,12 @@ export const strings: Record<Locale, StringMap> = {
     footerBuilder: 'Built by tokugai',
     footerUpdatedPrefix: 'Last updated ',
     footerSource: 'Source on GitHub',
+    privacyPageTitle: 'Privacy Policy — Boring Meeting Alarm',
+    privacyPageMetaDescription:
+      'How Boring Meeting Alarm handles your data. No meeting audio is recorded or uploaded. Analytics and ads are gated behind your explicit consent.',
+    privacyLastUpdatedLabel: 'Last updated',
+    privacyBackToTool: '← Back to the tool',
+    footerPrivacyLink: 'Privacy',
   },
   zh: {
     htmlLang: 'zh-CN',
@@ -189,6 +200,12 @@ export const strings: Record<Locale, StringMap> = {
     footerBuilder: '由 tokugai 构建',
     footerUpdatedPrefix: '最后更新于 ',
     footerSource: 'GitHub 源码',
+    privacyPageTitle: '隐私政策 — 会议静音提醒',
+    privacyPageMetaDescription:
+      '会议静音提醒如何处理你的数据：不录制、不上传任何会议音频；分析与广告 cookies 仅在你明确同意后启用。',
+    privacyLastUpdatedLabel: '最后更新',
+    privacyBackToTool: '← 返回工具',
+    footerPrivacyLink: '隐私政策',
   },
   ja: {
     htmlLang: 'ja',
@@ -262,5 +279,11 @@ export const strings: Record<Locale, StringMap> = {
     footerBuilder: 'tokugai 制作',
     footerUpdatedPrefix: '最終更新：',
     footerSource: 'GitHub ソース',
+    privacyPageTitle: 'プライバシーポリシー — 会議サイレントアラーム',
+    privacyPageMetaDescription:
+      '会議サイレントアラームがデータをどう扱うか：会議音声の録音・アップロードは一切なし。解析と広告 Cookie は明示的な同意後にのみ有効。',
+    privacyLastUpdatedLabel: '最終更新',
+    privacyBackToTool: '← ツールに戻る',
+    footerPrivacyLink: 'プライバシー',
   },
 };
